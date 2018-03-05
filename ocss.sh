@@ -45,7 +45,7 @@ upload_retries="1"
 # copy URL to clip board -- true/false
 copy_url="true"
 # command to open the uploaded screenshot in a browser
-open_command="chromium %url"
+open_command="open %url"
 # path and filename for the logfile
 log_file="$HOME/.ocss.log"
 
@@ -53,7 +53,10 @@ log_file="$HOME/.ocss.log"
 
 
 is_mac() {
-  uname | grep -q "Darwin"
+  if [[ "{$OSTYPE}" == "darwin"* ]];
+  then
+    return 1
+  fi
 }
 
 if [ "$1" = "check" ]; then
@@ -87,9 +90,9 @@ take_screenshot() {
   echo "Please select area"
   is_mac || sleep 0.1 # https://bbs.archlinux.org/viewtopic.php?pid=1246173#p1246173
 
-  if ! (scrot -s "$1" || screencapture -s "$1"); then #takes a screenshot with selection
+  if ! ((scrot -s "$1") || screencapture -s "$1"); then #takes a screenshot with selection
     echo "Couldn't make selective shot (mouse trapped?). Trying to grab active window instead"
-    if ! (scrot -u "$1" &>/dev/null || screencapture -oWa "$1" &>/dev/null); then
+    if ! ((scrot -u "$1" &>/dev/null) || screencapture -oWa "$1" &>/dev/null); then
       echo "Error for image '$1'!" | tee -a "$log_file"
       notify error "Something went wrong :(" "Information has been logged"
       exit 1
